@@ -1,0 +1,50 @@
+{
+  "simulator": {
+    "enable_debug_log": true,
+    "life_time_in_min": 1
+  },
+  "servers": {
+    "servers_details": [
+      {
+        "name": "p1",
+        "output_delay_in_ms": 200,
+        "output_loss_rate": 0,
+        "input_delay_in_ms": 200,
+        "input_loss_rate": 0
+      },
+      {
+        "name": "p2",
+        "output_delay_in_ms": 200,
+        "output_loss_rate": 0,
+        "input_delay_in_ms": 200,
+        "input_loss_rate": 0
+      },
+      {
+        "name": "p3",
+        "output_delay_in_ms": 200,
+        "output_loss_rate": 0,
+        "input_delay_in_ms": 200,
+        "input_loss_rate": 0
+      },
+      {
+        "name": "p4",
+        "output_delay_in_ms": 200,
+        "output_loss_rate": 0,
+        "input_delay_in_ms": 20000,
+        "input_loss_rate": 0
+      },
+      {
+        "name": "p5",
+        "output_delay_in_ms": 200,
+        "output_loss_rate": 1.0,
+        "input_delay_in_ms": 200,
+        "input_loss_rate": 1.0
+      }
+    ]
+  },
+  "bitcoin": {
+    "server_to_seeds": {
+      "p1": ["p2", "p3"]
+    }
+  }
+}

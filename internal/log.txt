@@ -1,0 +1,8 @@
+{"level":"info","ts":1664097827.269863,"msg":"p1 receive start message at 2022-09-25 17:23:47.269856 +0800 +08 m=+0.005320959"}
+{"level":"info","ts":1664097827.269918,"msg":"p1 start sending ping to all seeds at 2022-09-25 17:23:47.269917 +0800 +08 m=+0.005382251"}
+{"level":"info","ts":1664097827.269949,"msg":"p2 get ping message from p1"}
+{"level":"info","ts":1664097827.2699609,"msg":"p3 get ping message from p1"}
+{"level":"info","ts":1664097827.269971,"msg":"p1 get pong from p2"}
+{"level":"info","ts":1664097827.26998,"msg":"p1 get pong from p3"}
+{"level":"info","ts":1664097827.26999,"msg":"p4 get ping message from p1"}
+{"level":"info","ts":1664097827.270002,"msg":"p1 get pong from p4"}
