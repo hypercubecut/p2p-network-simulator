@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"p2psimulator/internal/bitcoin"
 	"p2psimulator/internal/bitcoin/msgtype"
 	"p2psimulator/internal/config"
@@ -12,8 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSimulator_BuildSimpleBitcoinNetWork(t *testing.T) {
-	cfg, err := config.NewConfigFromString(simpleTestConfig)
+func TestSimulator_TestTwoNodesDiscovery(t *testing.T) {
+	cfg, err := config.NewConfigFromString(twoBitcoinNodesTestConfig)
 
 	simulator, err := NewSimulator(cfg)
 	assert.NoError(t, err)
@@ -22,21 +23,28 @@ func TestSimulator_BuildSimpleBitcoinNetWork(t *testing.T) {
 
 	simulator.BuildSimpleNetwork(trigger)
 
-	peersToP1 := &bitcoin.Peers{
-		Peers: []string{"p2", "p3", "p4", "p5"},
-	}
-
 	now := time.Now()
-	healthCheckEvent := trigger.Send(bitcoin.NewPacket(msgtype.StartMessageType, peersToP1, nil, nil), now)
-	simulator.Run([]base.Event{healthCheckEvent})
-	defer simulator.Network.Wait()
+	triggerP1PeerDiscovery :=
+		trigger.Send(bitcoin.NewPacket(msgtype.PeerDiscoveryMessageType, nil, nil, nil), now)
+
+	simulator.Run([]base.Event{triggerP1PeerDiscovery})
+	simulator.Network.Wait()
+
+	p1 := simulator.Nodes["p1"].(*bitcoin.Node)
+	fmt.Println("p1's available peers", p1.GetAvailablePeers())
+
+	p2 := simulator.Nodes["p2"].(*bitcoin.Node)
+	fmt.Println("p2's available peers", p2.GetAvailablePeers())
+
+	p3 := simulator.Nodes["p3"].(*bitcoin.Node)
+	fmt.Println("p3's available peers", p3.GetAvailablePeers())
 }
 
-const simpleTestConfig = `
+const twoBitcoinNodesTestConfig = `
 {
   "simulator": {
     "enable_debug_log": true,
-    "life_time_in_min": 1
+    "life_time_in_min": 2
   },
   "servers": {
     "servers_details": [
@@ -49,31 +57,17 @@ const simpleTestConfig = `
       },
       {
         "name": "p2",
-        "output_delay_in_ms": 200,
+        "output_delay_in_ms": 100,
         "output_loss_rate": 0,
-        "input_delay_in_ms": 200,
+        "input_delay_in_ms": 100,
         "input_loss_rate": 0
       },
-      {
+	  {
         "name": "p3",
-        "output_delay_in_ms": 200,
+        "output_delay_in_ms": 500,
         "output_loss_rate": 0,
-        "input_delay_in_ms": 200,
+        "input_delay_in_ms": 500,
         "input_loss_rate": 0
-      },
-      {
-        "name": "p4",
-        "output_delay_in_ms": 200,
-        "output_loss_rate": 0,
-        "input_delay_in_ms": 20000,
-        "input_loss_rate": 0
-      },
-      {
-        "name": "p5",
-        "output_delay_in_ms": 200,
-        "output_loss_rate": 1.0,
-        "input_delay_in_ms": 200,
-        "input_loss_rate": 1.0
       }
     ]
   },

@@ -2,7 +2,6 @@ package internal
 
 import (
 	"p2psimulator/internal/bitcoin"
-	"p2psimulator/internal/bitcoin/dto"
 	"p2psimulator/internal/bitcoin/msgtype"
 	"p2psimulator/internal/config"
 	"testing"
@@ -54,7 +53,7 @@ func Test_PingPongTest(t *testing.T) {
 
 	endpoint2.Receive(endpoint2.Handler(nodes, simulator.Logger))
 
-	seedsToPeer1 := dto.Peers{
+	seedsToPeer1 := &bitcoin.Peers{
 		Peers: []string{"peer-2"},
 	}
 

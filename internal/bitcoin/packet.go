@@ -1,7 +1,6 @@
 package bitcoin
 
 import (
-	"encoding/json"
 	"p2psimulator/internal/bitcoin/msgtype"
 
 	"github.com/bytedance/ns-x/v2/base"
@@ -11,29 +10,27 @@ type Packet struct {
 	base.Packet
 
 	MessageType msgtype.MessageType
-	Payload     []byte
+	Payload     interface{}
 	Source      *Node
 	Destination *Node
 }
 
 func (m *Packet) Size() int {
-	return len(m.Payload)
+	return 1
 }
 
 func (m *Packet) GetMessageType() msgtype.MessageType {
 	return m.MessageType
 }
 
-func (m *Packet) GetPayload() []byte {
+func (m *Packet) GetPayload() interface{} {
 	return m.Payload
 }
 
-func NewPacket(messageType msgtype.MessageType, payloadObject interface{}, src, des *Node) *Packet {
-	bytePayload, _ := json.Marshal(payloadObject)
-
+func NewPacket(messageType msgtype.MessageType, payloadObj interface{}, src, des *Node) *Packet {
 	return &Packet{
 		MessageType: messageType,
-		Payload:     bytePayload,
+		Payload:     payloadObj,
 		Source:      src,
 		Destination: des,
 	}

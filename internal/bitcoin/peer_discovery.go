@@ -1,11 +1,11 @@
 package bitcoin
 
 import (
-	"encoding/json"
-	"p2psimulator/internal/bitcoin/dto"
+	"fmt"
 	"p2psimulator/internal/bitcoin/msgtype"
-	"p2psimulator/internal/bitcoin/nodestate"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/bytedance/ns-x/v2/base"
 )
@@ -14,7 +14,7 @@ func (n *Node) peerDiscoveryHandler(nodes map[string]base.Node) []base.Event {
 	// Start peer discovery period
 	var events []base.Event
 
-	for _, dns := range n.DNSSeeds {
+	for _, dns := range n.seeds {
 		destination := nodes[dns].(*Node)
 		events = append(events, n.Send(&Packet{
 			MessageType: msgtype.QueryMessageType,
@@ -22,32 +22,167 @@ func (n *Node) peerDiscoveryHandler(nodes map[string]base.Node) []base.Event {
 			Source:      n,
 			Destination: destination}, time.Now()),
 		)
+		n.logger.Debug(fmt.Sprintf("%s send query message to %s", n.name, destination.name))
 	}
 
 	return events
 }
 
-func (n *Node) dnsAHandler(packet *Packet, nodes map[string]base.Node) []base.Event {
-	var dnsAPayload dto.DNSARecord
+func (n *Node) queryMessageHandler(packet *Packet) []base.Event {
+	respPayload := &DNSARecord{IP: n.name}
 
-	err := json.Unmarshal(packet.Payload, &dnsAPayload)
-	if err != nil {
-		n.logger.Error("failed unmarshal dnsA message")
+	event := n.Send(&Packet{
+		MessageType: msgtype.DNSARecordMessageType,
+		Payload:     respPayload,
+		Source:      n,
+		Destination: packet.Source}, time.Now())
+
+	n.logger.Debug(fmt.Sprintf("%s send DNS A record message to %s", n.name, packet.Source.name))
+
+	return base.Aggregate(event)
+}
+
+func (n *Node) dnsAHandler(packet *Packet, nodes map[string]base.Node) []base.Event {
+	dnsAPayload, ok := packet.Payload.(*DNSARecord)
+	if !ok {
+		n.logger.Error("dnsAHandler failed unmarshal dnsA message")
+		return n.handleErrResp(msgtype.VersionMessageType, ErrUnknownPayload, packet)
+	}
+
+	n.logger.Debug(fmt.Sprintf("%s get DNS A record message from %s, %s",
+		n.name, packet.Source.name, dnsAPayload.IP))
+
+	event := n.Send(&Packet{
+		MessageType: msgtype.VersionMessageType,
+		Payload: &VersionMessage{
+			Version:   defaultVersion,
+			Services:  n.serviceCode,
+			Timestamp: time.Now().UnixMilli(),
+		},
+		Source:      n,
+		Destination: packet.Source}, time.Now())
+
+	return base.Aggregate(event)
+}
+
+func (n *Node) versionMsgHandler(packet *Packet) []base.Event {
+	switch packet.Payload.(type) {
+	case *VersionMessage:
+		_ = packet.Payload.(*VersionMessage)
+	case *Error:
+		n.logger.Error("versionMsg is error",
+			zap.String("err", packet.Payload.(*Error).Msg))
+
+		return n.handleErrResp(msgtype.VersionMessageBackType, ErrUnknownPayload, packet)
+	}
+
+	// Todo: validate version msg here
+
+	event := n.Send(&Packet{
+		MessageType: msgtype.VersionMessageBackType,
+		Payload: &VersionMessage{
+			Version:   defaultVersion,
+			Services:  n.serviceCode,
+			Timestamp: time.Now().UnixMilli(),
+		},
+		Source:      n,
+		Destination: packet.Source}, time.Now())
+
+	return base.Aggregate(event)
+}
+
+func (n *Node) versionMsgBackHandler(packet *Packet) []base.Event {
+	switch packet.Payload.(type) {
+	case *VersionMessage:
+		_ = packet.Payload.(*VersionMessage)
+	case *Error:
+		n.logger.Error("versionMsgBack is error",
+			zap.String("err", packet.Payload.(*Error).Msg))
+
+		return n.handleErrResp(msgtype.VerAckMessageType, ErrUnknownPayload, packet)
+	}
+
+	event := n.Send(&Packet{
+		MessageType: msgtype.VerAckMessageType,
+		Payload:     &VersionAckMessage{},
+		Source:      n,
+		Destination: packet.Source}, time.Now())
+
+	return base.Aggregate(event)
+}
+
+func (n *Node) verAckMessageHandler(packet *Packet) []base.Event {
+	switch packet.Payload.(type) {
+	case *VersionAckMessage:
+		_ = packet.Payload.(*VersionAckMessage)
+	case *Error:
+		n.logger.Error("verAckMessage is error",
+			zap.String("err", packet.Payload.(*Error).Msg))
+
+		return n.handleErrResp(msgtype.VerAckBackMessageType, ErrUnknownPayload, packet)
+	}
+
+	n.addNewPeers(packet.Source.name)
+
+	n.logger.Debug(fmt.Sprintf("%s get ver ack message from %s", n.name, packet.Source.name))
+
+	event := n.Send(&Packet{
+		MessageType: msgtype.VerAckBackMessageType,
+		Payload:     &VersionAckMessage{},
+		Source:      n,
+		Destination: packet.Source}, time.Now())
+
+	return base.Aggregate(event)
+}
+
+func (n *Node) verAckBackMessageHandler(packet *Packet) []base.Event {
+	switch packet.Payload.(type) {
+	case *VersionAckMessage:
+		n.addNewPeers(packet.Source.name)
+		n.logger.Debug(fmt.Sprintf("%s get ver ack back message from %s", n.name, packet.Source.name))
+
+		event := n.Send(&Packet{
+			MessageType: msgtype.GetAddressesMessageType,
+			Payload:     nil,
+			Source:      n,
+			Destination: packet.Source,
+		}, time.Now())
+
+		return base.Aggregate(event)
+
+	case *Error:
+		n.logger.Error("verAckBackMessage is error",
+			zap.String("err", packet.Payload.(*Error).Msg))
+		return nil
+
+	default:
 		return nil
 	}
+}
 
-	if dnsAPayload.IP != "" {
-		n.State = nodestate.Connecting
+func (n *Node) getAddressHandler(packet *Packet) []base.Event {
+	respDTO := &GetAddressResp{
+		MorePeers: n.GetAvailablePeers(),
 	}
 
-	n.availablePeers = append(n.availablePeers, dnsAPayload.IP)
-
-	destination := nodes[dnsAPayload.IP].(*Node)
-	n.Send(&Packet{
-		MessageType: msgtype.VersionMessageType,
-		Payload:     []byte{},
+	event := n.Send(&Packet{
+		MessageType: msgtype.GetAddressesRespMessageType,
+		Payload:     respDTO,
 		Source:      n,
-		Destination: destination}, time.Now())
+		Destination: packet.Source,
+	}, time.Now())
 
-	return nil
+	return base.Aggregate(event)
+}
+
+func (n *Node) getAddressesRespHandler(packet *Packet, nodes map[string]base.Node) []base.Event {
+	switch packet.Payload.(type) {
+	case *GetAddressResp:
+		n.addNewPeers(packet.Payload.(*GetAddressResp).MorePeers...)
+
+		return n.initialBlockDownload(nodes)
+
+	default:
+		return nil
+	}
 }

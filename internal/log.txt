@@ -1,8 +1,10 @@
-{"level":"info","ts":1664097827.269863,"msg":"p1 receive start message at 2022-09-25 17:23:47.269856 +0800 +08 m=+0.005320959"}
-{"level":"info","ts":1664097827.269918,"msg":"p1 start sending ping to all seeds at 2022-09-25 17:23:47.269917 +0800 +08 m=+0.005382251"}
-{"level":"info","ts":1664097827.269949,"msg":"p2 get ping message from p1"}
-{"level":"info","ts":1664097827.2699609,"msg":"p3 get ping message from p1"}
-{"level":"info","ts":1664097827.269971,"msg":"p1 get pong from p2"}
-{"level":"info","ts":1664097827.26998,"msg":"p1 get pong from p3"}
-{"level":"info","ts":1664097827.26999,"msg":"p4 get ping message from p1"}
-{"level":"info","ts":1664097827.270002,"msg":"p1 get pong from p4"}
+{"level":"debug","ts":1664615137.948224,"msg":"p1 send query message to p2"}
+{"level":"debug","ts":1664615137.948661,"msg":"p1 send query message to p3"}
+{"level":"debug","ts":1664615137.948725,"msg":"p2 send DNS A record message to p1"}
+{"level":"debug","ts":1664615137.948749,"msg":"p1 send DNS A record message to p2"}
+{"level":"debug","ts":1664615137.948812,"msg":"p2 get ver ack message from p1"}
+{"level":"debug","ts":1664615137.948839,"msg":"p1 get ver ack back message from p2"}
+{"level":"debug","ts":1664615137.948852,"msg":"p3 send DNS A record message to p1"}
+{"level":"debug","ts":1664615137.9488618,"msg":"p1 send DNS A record message to p3"}
+{"level":"debug","ts":1664615137.9488761,"msg":"p3 get ver ack message from p1"}
+{"level":"debug","ts":1664615137.948885,"msg":"p1 get ver ack back message from p3"}
