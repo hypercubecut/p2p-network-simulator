@@ -2,7 +2,9 @@ package bitcoin
 
 import (
 	"errors"
+	"fmt"
 	"p2psimulator/internal/bitcoin/msgtype"
+	"p2psimulator/internal/bitcoin/servicecode"
 	"time"
 
 	"github.com/bytedance/ns-x/v2/base"
@@ -12,7 +14,7 @@ const (
 	maxInventoryLen = 500
 )
 
-func (n *Node) initialBlockDownload(nodes map[string]base.Node) []base.Event {
+func (n *Node) initialBlockDownloadWithBlocksFirst(nodes map[string]base.Node) []base.Event {
 	// pick one full node
 	var pickedNode *Node
 	for peer, _ := range n.availablePeers {
@@ -21,13 +23,15 @@ func (n *Node) initialBlockDownload(nodes map[string]base.Node) []base.Event {
 			return nil
 		}
 
-		if pn.GetServiceCode() == NODE_NETWORK {
+		if pn.GetServiceCode() == servicecode.NODE_NETWORK {
 			pickedNode = pn
 			break
 		}
 	}
 
 	if pickedNode == nil {
+		n.logger.Debug(fmt.Sprintf("%s cannot find any full node from peers, "+
+			"stop after service discovery", n.name))
 		return nil
 	}
 
@@ -173,12 +177,4 @@ func (n *Node) getBlockDataRespHandler(packet *Packet) []base.Event {
 		// Todo: do something here to get the data
 		return nil
 	}
-}
-
-func makeRange(min, max int) []int {
-	a := make([]int, max-min+1)
-	for i := range a {
-		a[i] = min + i
-	}
-	return a
 }

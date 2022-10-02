@@ -31,19 +31,19 @@ func Test_BasicSanityTest(t *testing.T) {
 		panic("no route to host")
 	}))
 
-	client := bitcoin.NewNode("127.0.0.1", []string{}, simulator.Logger)
+	client := bitcoin.NewClientNode("127.0.0.1", []string{}, simulator.Logger)
 
 	network, nodes := helper.
 		Chain().
 		NodeWithName("client", client).
 		NodeWithName("scatter", scatter).
 		NodeWithName("route1", node.NewChannelNode(node.WithDelay(math.NewFixedDelay(time.Millisecond*200)))).
-		NodeWithName("server1", bitcoin.NewNode("192.168.0.1", []string{}, simulator.Logger)).
+		NodeWithName("server1", bitcoin.NewClientNode("192.168.0.1", []string{}, simulator.Logger)).
 		Chain().
 		Node(client).
 		Node(scatter).
 		NodeWithName("route2", node.NewChannelNode(node.WithDelay(math.NewFixedDelay(time.Millisecond*300)))).
-		NodeWithName("server2", bitcoin.NewNode("192.168.0.2", []string{}, simulator.Logger)).Summary().
+		NodeWithName("server2", bitcoin.NewClientNode("192.168.0.2", []string{}, simulator.Logger)).Summary().
 		Build()
 
 	server1 := nodes["server1"].(*bitcoin.Node)

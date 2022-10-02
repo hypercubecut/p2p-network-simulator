@@ -12,7 +12,6 @@ func Test_NewConfigFromJson(t *testing.T) {
 
 	assert.Equal(t, true, cfg.SimulatorCfg.EnableDebugLog)
 	assert.Equal(t, 3, len(cfg.ServersCfg.Servers))
-	assert.Equal(t, 1, len(cfg.BitcoinCfg.ServerToSeeds))
 }
 
 func Test_NewConfigFromByte(t *testing.T) {
@@ -48,9 +47,6 @@ func Test_NewConfigFromByte(t *testing.T) {
     ]
   },
   "bitcoin": {
-    "server_to_seeds": {
-      "p1": ["p2", "p3"]
-    }
   }
 }
 `
@@ -59,5 +55,4 @@ func Test_NewConfigFromByte(t *testing.T) {
 
 	assert.Equal(t, true, cfg.SimulatorCfg.EnableDebugLog)
 	assert.Equal(t, 3, len(cfg.ServersCfg.Servers))
-	assert.Equal(t, 1, len(cfg.BitcoinCfg.ServerToSeeds))
 }

@@ -15,8 +15,8 @@ var (
 	}
 )
 
-func (s *Simulator) BuildSimpleNetwork(trigger *node.EndpointNode) {
-	scatter := node.NewScatterNode(node.WithRouteSelector(func(packet base.Packet, nodes []base.Node) base.Node {
+func (s *Simulator) BuildBitcoinNetwork() {
+	router := node.NewScatterNode(node.WithRouteSelector(func(packet base.Packet, nodes []base.Node) base.Node {
 		if p, ok := packet.(*bitcoin.Packet); ok {
 			return s.Nodes[genRestrictInName(p.Destination.ID())]
 		}
@@ -24,17 +24,14 @@ func (s *Simulator) BuildSimpleNetwork(trigger *node.EndpointNode) {
 	}))
 
 	var allServers []*bitcoin.Node
-	for idx, serverCfg := range s.cfg.ServersCfg.Servers {
-		var seeds []string
-		seeds = s.cfg.BitcoinCfg.ServerToSeeds[serverCfg.Name]
+	for _, serverCfg := range s.cfg.ServersCfg.Servers {
+		server := bitcoin.NewNodeWithDetails(serverCfg.Name,
+			int(serverCfg.ServiceCode), serverCfg.Seeds, s.Logger)
 
-		server := bitcoin.NewNode(serverCfg.Name, seeds, s.Logger)
-
-		if idx == 0 {
-			s.Builder.Chain().
-				NodeWithName("trigger", trigger).
-				NodeWithName(server.ID(), server)
-		}
+		// add trigger node for each bitcoin node
+		s.Builder.Chain().
+			NodeWithName("trigger-"+serverCfg.Name, node.NewEndpointNode()).
+			NodeWithName(server.ID(), server)
 
 		// ChannelNode is a simulated network channel with loss, delay and reorder features
 		var outChannelOpt []node.Option
@@ -53,11 +50,11 @@ func (s *Simulator) BuildSimpleNetwork(trigger *node.EndpointNode) {
 		restrictNodeOut := node.NewRestrictNode(node.WithBPSLimit(1024*1024, 4*1024*1024))
 
 		// output flow chain
-		// server -> channel -> restrict -> scatter
+		// server -> channel -> restrict -> router
 		s.Builder.Chain().NodeWithName(server.ID(), server).
 			NodeWithName(genChannelOutName(server.ID()), channelNodeOut).
 			NodeWithName(genRestrictOutName(server.ID()), restrictNodeOut).
-			NodeWithName("scatter", scatter)
+			NodeWithName("router", router)
 
 		// input flow chain
 		var inChannelOpt []node.Option
@@ -72,8 +69,8 @@ func (s *Simulator) BuildSimpleNetwork(trigger *node.EndpointNode) {
 
 		restrictNodeIn := node.NewRestrictNode(node.WithBPSLimit(1024*1024, 4*1024*1024))
 
-		// scatter -> restrict -> channel -> server
-		s.Builder.Chain().NodeWithName("scatter", scatter).
+		// router -> restrict -> channel -> server
+		s.Builder.Chain().NodeWithName("router", router).
 			NodeWithName(genRestrictInName(server.ID()), restrictNodeIn).
 			NodeWithName(genChannelInName(server.ID()), channelNodeIn).
 			NodeWithName(server.ID(), server)
@@ -89,4 +86,21 @@ func (s *Simulator) BuildSimpleNetwork(trigger *node.EndpointNode) {
 
 	s.Network = network
 	s.Nodes = nodes
+}
+
+func buildInitialMasterChain(masterChainLen int) {
+	var i int
+
+	for i < masterChainLen-1 {
+		newBlock, err := bitcoin.GenerateBlock(bitcoin.MasterBlockchain[len(bitcoin.MasterBlockchain)-1], 55)
+		if err != nil {
+			panic("failed to generate initial blocks")
+		}
+
+		// Skip bitcoin.IsBlockValid() here
+
+		bitcoin.MasterBlockchain = append(bitcoin.MasterBlockchain, newBlock)
+
+		i++
+	}
 }

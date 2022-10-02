@@ -9,10 +9,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-// ref: https://mycoralhealth.medium.com/code-your-own-blockchain-in-less-than-200-lines-of-go-e296282bcffc
 var (
-	genesisBlock     = &Block{0, time.Now().String(), 0, "", ""}
-	MasterBlockchain = []*Block{genesisBlock}
+	GenesisBlock     = &Block{0, time.Now().String(), 0, "", "", ""}
+	MasterBlockchain = []*Block{GenesisBlock}
 )
 
 type Block struct {
@@ -30,9 +29,12 @@ type Block struct {
 
 	// PrevHash is the SHA256 identifier of the previous record in the chain
 	PrevHash string
+
+	// Information record in this block
+	Content string
 }
 
-func calculateHash(block *Block) string {
+func CalculateHash(block *Block) string {
 	record := strconv.Itoa(block.Index) + block.Timestamp + strconv.Itoa(block.BPM) + block.PrevHash
 	h := sha256.New()
 	h.Write([]byte(record))
@@ -40,8 +42,8 @@ func calculateHash(block *Block) string {
 	return hex.EncodeToString(hashed)
 }
 
-func generateBlock(oldBlock *Block, BPM int) (*Block, error) {
-	var newBlock *Block
+func GenerateBlock(oldBlock *Block, BPM int) (*Block, error) {
+	newBlock := &Block{}
 
 	t := time.Now()
 
@@ -49,12 +51,27 @@ func generateBlock(oldBlock *Block, BPM int) (*Block, error) {
 	newBlock.Timestamp = t.String()
 	newBlock.BPM = BPM
 	newBlock.PrevHash = oldBlock.Hash
-	newBlock.Hash = calculateHash(newBlock)
+	newBlock.Hash = CalculateHash(newBlock)
 
 	return newBlock, nil
 }
 
-func isBlockValid(newBlock, oldBlock *Block) bool {
+func GenerateBlockWithContent(oldBlock *Block, BPM int, content string) (*Block, error) {
+	newBlock := &Block{}
+
+	t := time.Now()
+
+	newBlock.Index = oldBlock.Index + 1
+	newBlock.Timestamp = t.String()
+	newBlock.BPM = BPM
+	newBlock.PrevHash = oldBlock.Hash
+	newBlock.Hash = CalculateHash(newBlock)
+	newBlock.Content = content
+
+	return newBlock, nil
+}
+
+func IsBlockValid(newBlock, oldBlock *Block) bool {
 	if oldBlock.Index+1 != newBlock.Index {
 		return false
 	}
@@ -63,14 +80,14 @@ func isBlockValid(newBlock, oldBlock *Block) bool {
 		return false
 	}
 
-	if calculateHash(newBlock) != newBlock.Hash {
+	if CalculateHash(newBlock) != newBlock.Hash {
 		return false
 	}
 
 	return true
 }
 
-func replaceChain(newBlocks []*Block) {
+func ReplaceChain(newBlocks []*Block) {
 	if len(newBlocks) > len(MasterBlockchain) {
 		MasterBlockchain = newBlocks
 	}

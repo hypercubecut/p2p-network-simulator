@@ -149,15 +149,15 @@ func (n *Node) handleWriteBlock(request *Packet, nodes map[string]base.Node) []b
 		return n.handleErrResp(msgtype.WriteBlockResp, ErrUnknownPayload, request)
 	}
 
-	newBlock, err := generateBlock(MasterBlockchain[len(MasterBlockchain)-1], reqDTO.BPM)
+	newBlock, err := GenerateBlock(MasterBlockchain[len(MasterBlockchain)-1], reqDTO.BPM)
 	if err != nil {
 		n.logger.Error("failed to generateBlock", zap.Error(err))
 		return n.handleErrResp(msgtype.WriteBlockResp, err, request)
 	}
 
-	if isBlockValid(newBlock, MasterBlockchain[len(MasterBlockchain)-1]) {
+	if IsBlockValid(newBlock, MasterBlockchain[len(MasterBlockchain)-1]) {
 		newBlockchain := append(MasterBlockchain, newBlock)
-		replaceChain(newBlockchain)
+		ReplaceChain(newBlockchain)
 		spew.Dump(MasterBlockchain)
 
 		n.logger.Info("enter a new BPM")

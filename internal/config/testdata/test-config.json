@@ -7,6 +7,8 @@
     "servers_details": [
       {
         "name": "p1",
+        "service_code": 0,
+        "seeds": ["p2", "p3"],
         "output_delay_in_ms": 200,
         "output_loss_rate": 0,
         "input_delay_in_ms": 200,
@@ -20,17 +22,10 @@
         "input_loss_rate": 0
       },
       {
-        "name": "p3",
-        "output_delay_in_ms": 200,
-        "output_loss_rate": 0,
-        "input_delay_in_ms": 200,
-        "input_loss_rate": 0
+        "name": "p3"
       }
     ]
   },
   "bitcoin": {
-    "server_to_seeds": {
-      "p1": ["p2", "p3"]
-    }
   }
 }

@@ -13,31 +13,36 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSimulator_TestTwoNodesDiscovery(t *testing.T) {
+func TestSimulator_TestBlocksFirst(t *testing.T) {
 	cfg, err := config.NewConfigFromString(twoBitcoinNodesTestConfig)
+
+	fmt.Printf("%+v \n", cfg)
+
+	buildInitialMasterChain(cfg.BitcoinCfg.MasterChainLen)
 
 	simulator, err := NewSimulator(cfg)
 	assert.NoError(t, err)
 
-	trigger := node.NewEndpointNode()
-
-	simulator.BuildSimpleNetwork(trigger)
+	simulator.BuildBitcoinNetwork()
 
 	now := time.Now()
+
+	triggerP1 := simulator.Nodes["trigger-p1"].(*node.EndpointNode)
+
 	triggerP1PeerDiscovery :=
-		trigger.Send(bitcoin.NewPacket(msgtype.PeerDiscoveryMessageType, nil, nil, nil), now)
+		triggerP1.Send(bitcoin.NewPacket(msgtype.PeerDiscoveryMessageType, nil, nil, nil), now)
 
 	simulator.Run([]base.Event{triggerP1PeerDiscovery})
 	simulator.Network.Wait()
 
 	p1 := simulator.Nodes["p1"].(*bitcoin.Node)
-	fmt.Println("p1's available peers", p1.GetAvailablePeers())
+	//fmt.Println("p1's inventory is", p1.GetInventory())
+	//spew.Dump(p1.GetChain())
 
 	p2 := simulator.Nodes["p2"].(*bitcoin.Node)
-	fmt.Println("p2's available peers", p2.GetAvailablePeers())
+	//fmt.Println("p2's inventory is", p2.GetInventory())
 
-	p3 := simulator.Nodes["p3"].(*bitcoin.Node)
-	fmt.Println("p3's available peers", p3.GetAvailablePeers())
+	assert.Equal(t, p2.GetInventory(), p1.GetInventory())
 }
 
 const twoBitcoinNodesTestConfig = `
@@ -50,6 +55,7 @@ const twoBitcoinNodesTestConfig = `
     "servers_details": [
       {
         "name": "p1",
+		"seeds": ["p2"],
         "output_delay_in_ms": 200,
         "output_loss_rate": 0,
         "input_delay_in_ms": 200,
@@ -57,24 +63,16 @@ const twoBitcoinNodesTestConfig = `
       },
       {
         "name": "p2",
+		"service_code": 1,
         "output_delay_in_ms": 100,
         "output_loss_rate": 0,
         "input_delay_in_ms": 100,
-        "input_loss_rate": 0
-      },
-	  {
-        "name": "p3",
-        "output_delay_in_ms": 500,
-        "output_loss_rate": 0,
-        "input_delay_in_ms": 500,
         "input_loss_rate": 0
       }
     ]
   },
   "bitcoin": {
-    "server_to_seeds": {
-      "p1": ["p2", "p3"]
-    }
+	"master_chain_len": 1000
   }
 }
 `

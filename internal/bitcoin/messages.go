@@ -10,7 +10,7 @@ type WriteBlockResp struct {
 
 type VersionMessage struct {
 	Version   int32
-	Services  uint64
+	Services  int64
 	Timestamp int64
 }
 

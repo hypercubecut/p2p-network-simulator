@@ -2,6 +2,7 @@ package bitcoin
 
 import (
 	"p2psimulator/internal/bitcoin/msgtype"
+	"unsafe"
 
 	"github.com/bytedance/ns-x/v2/base"
 )
@@ -16,7 +17,9 @@ type Packet struct {
 }
 
 func (m *Packet) Size() int {
-	return 1
+	i := uint64(unsafe.Sizeof(m))
+
+	return int(i)
 }
 
 func (m *Packet) GetMessageType() msgtype.MessageType {

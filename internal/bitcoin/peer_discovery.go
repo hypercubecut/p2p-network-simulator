@@ -122,7 +122,7 @@ func (n *Node) verAckMessageHandler(packet *Packet) []base.Event {
 		return n.handleErrResp(msgtype.VerAckBackMessageType, ErrUnknownPayload, packet)
 	}
 
-	n.addNewPeers(packet.Source.name)
+	n.AddNewPeers(packet.Source.name)
 
 	n.logger.Debug(fmt.Sprintf("%s get ver ack message from %s", n.name, packet.Source.name))
 
@@ -138,7 +138,7 @@ func (n *Node) verAckMessageHandler(packet *Packet) []base.Event {
 func (n *Node) verAckBackMessageHandler(packet *Packet) []base.Event {
 	switch packet.Payload.(type) {
 	case *VersionAckMessage:
-		n.addNewPeers(packet.Source.name)
+		n.AddNewPeers(packet.Source.name)
 		n.logger.Debug(fmt.Sprintf("%s get ver ack back message from %s", n.name, packet.Source.name))
 
 		event := n.Send(&Packet{
@@ -178,9 +178,11 @@ func (n *Node) getAddressHandler(packet *Packet) []base.Event {
 func (n *Node) getAddressesRespHandler(packet *Packet, nodes map[string]base.Node) []base.Event {
 	switch packet.Payload.(type) {
 	case *GetAddressResp:
-		n.addNewPeers(packet.Payload.(*GetAddressResp).MorePeers...)
+		n.AddNewPeers(packet.Payload.(*GetAddressResp).MorePeers...)
 
-		return n.initialBlockDownload(nodes)
+		// Todo: implement header first here
+
+		return n.initialBlockDownloadWithBlocksFirst(nodes)
 
 	default:
 		return nil

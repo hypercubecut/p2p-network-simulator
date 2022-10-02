@@ -5,8 +5,6 @@ import (
 	"os"
 	"p2psimulator/internal"
 	"p2psimulator/internal/config"
-
-	"github.com/bytedance/ns-x/v2/node"
 )
 
 func main() {
@@ -23,9 +21,7 @@ func main() {
 		return
 	}
 
-	trigger := node.NewEndpointNode()
-
-	simulator.BuildSimpleNetwork(trigger)
+	simulator.BuildBitcoinNetwork()
 
 	// Todo: give events here
 	simulator.Run(nil)
