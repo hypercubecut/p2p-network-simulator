@@ -11,8 +11,10 @@ const (
 	GetBlockChainReq  MessageType = "get_block_chain_req"
 	GetBlockChainResp MessageType = "get_block_chain_resp"
 
-	WriteBlockReq  MessageType = "write_block_req"
-	WriteBlockResp MessageType = "write_block_resp"
+	MineNewBlockReq  MessageType = "mine_block_req"
+	MineNewBlockResp MessageType = "mine_block_resp"
+
+	InventoryMessage MessageType = "inventory"
 
 	PeerDiscoveryMessageType MessageType = "peer_discovery"
 	QueryMessageType         MessageType = "query"

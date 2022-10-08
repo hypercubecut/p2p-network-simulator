@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"math/rand"
 	"os"
 	"p2psimulator/internal/config"
@@ -32,6 +33,11 @@ type Simulator struct {
 	Random  *rand.Rand
 	Network *nsx.Network
 	Nodes   map[string]base.Node
+	Clock   tick.Clock
+
+	SimulatorTime time.Time
+
+	note string
 }
 
 func NewSimulator(cfg *config.Config) (*Simulator, error) {
@@ -47,16 +53,35 @@ func NewSimulator(cfg *config.Config) (*Simulator, error) {
 	helper := nsx.NewBuilder()
 
 	return &Simulator{
-		Logger:   logger,
-		LifeTime: time.Duration(cfg.SimulatorCfg.LifeTimeInMin) * time.Minute,
-		cfg:      cfg,
-		Builder:  helper,
-		Random:   random,
+		Logger:        logger,
+		LifeTime:      time.Duration(cfg.SimulatorCfg.LifeTimeInMin) * time.Minute,
+		cfg:           cfg,
+		Builder:       helper,
+		Random:        random,
+		SimulatorTime: time.Now(),
 	}, nil
 }
 
-func (s *Simulator) Run(events []base.Event) {
-	s.Network.Run(events, tick.NewStepClock(time.Now(), time.Second), s.LifeTime)
+func (s *Simulator) Run(events []base.Event, note string) {
+	s.Clock = tick.NewStepClock(s.SimulatorTime, time.Millisecond)
+	s.Network.Run(events, s.Clock, s.LifeTime)
+	s.note = note
+}
+
+func (s *Simulator) Wait() {
+	s.Network.Wait()
+
+	clockTime := s.Clock()
+
+	diff := clockTime.Sub(s.SimulatorTime)
+
+	s.Logger.Info(fmt.Sprintf("finished run events %s", s.note), zap.String("timeCost", diff.String()))
+
+	s.SimulatorTime = clockTime
+}
+
+func (s *Simulator) GetSimulatorTime() time.Time {
+	return s.SimulatorTime
 }
 
 func genChannelOutName(id string) string {

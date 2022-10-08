@@ -24,5 +24,5 @@ func main() {
 	simulator.BuildBitcoinNetwork()
 
 	// Todo: give events here
-	simulator.Run(nil)
+	simulator.Run(nil, "")
 }

@@ -6,8 +6,6 @@ import (
 	"p2psimulator/internal/bitcoin/msgtype"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
-
 	"github.com/bytedance/ns-x/v2/base"
 	"go.uber.org/zap"
 )
@@ -33,14 +31,15 @@ func (n *Node) Handler(nodes map[string]base.Node, logger *zap.Logger) func(pack
 			return n.handleGetBlockchain(message, nodes)
 
 		case msgtype.GetBlockChainResp:
-			// Todo: implement here
 			return nil
 
-		case msgtype.WriteBlockReq:
-			return n.handleWriteBlock(message, nodes)
+		case msgtype.MineNewBlockReq:
+			return n.handleMineNewBlock(message, nodes)
 
-		case msgtype.WriteBlockResp:
-			// Todo: implement here
+		case msgtype.InventoryMessage:
+			return n.handleInventoryMessage(message)
+
+		case msgtype.MineNewBlockResp:
 			return nil
 
 		case msgtype.PingMessageType:
@@ -130,48 +129,6 @@ func (n *Node) handleStart(request *Packet, nodes map[string]base.Node) []base.E
 
 	// send ping to peer
 	return events
-}
-
-func (n *Node) handleGetBlockchain(request *Packet, nodes map[string]base.Node) []base.Event {
-	event := n.Send(&Packet{
-		MessageType: msgtype.GetBlockChainResp,
-		Payload:     MasterBlockchain,
-		Source:      n,
-		Destination: request.Source}, time.Now())
-
-	return base.Aggregate(event)
-}
-
-func (n *Node) handleWriteBlock(request *Packet, nodes map[string]base.Node) []base.Event {
-	reqDTO, ok := request.Payload.(*WriteBlockRequest)
-	if !ok {
-		n.logger.Error("handleWriteBlock failed unmarshal payload")
-		return n.handleErrResp(msgtype.WriteBlockResp, ErrUnknownPayload, request)
-	}
-
-	newBlock, err := GenerateBlock(MasterBlockchain[len(MasterBlockchain)-1], reqDTO.BPM)
-	if err != nil {
-		n.logger.Error("failed to generateBlock", zap.Error(err))
-		return n.handleErrResp(msgtype.WriteBlockResp, err, request)
-	}
-
-	if IsBlockValid(newBlock, MasterBlockchain[len(MasterBlockchain)-1]) {
-		newBlockchain := append(MasterBlockchain, newBlock)
-		ReplaceChain(newBlockchain)
-		spew.Dump(MasterBlockchain)
-
-		n.logger.Info("enter a new BPM")
-	}
-
-	respDTO := &WriteBlockResp{newBlock}
-
-	event := n.Send(&Packet{
-		MessageType: msgtype.WriteBlockResp,
-		Payload:     respDTO,
-		Source:      n,
-		Destination: request.Source}, time.Now())
-
-	return base.Aggregate(event)
 }
 
 func (n *Node) handleErrResp(respMsgType msgtype.MessageType, err error, request *Packet) []base.Event {

@@ -51,3 +51,7 @@ type GetBlockDataReq struct {
 type GetBlockDataResp struct {
 	Block *Block
 }
+
+type InventoryMessage struct {
+	Inventory int
+}

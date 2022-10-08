@@ -87,9 +87,9 @@ func IsBlockValid(newBlock, oldBlock *Block) bool {
 	return true
 }
 
-func ReplaceChain(newBlocks []*Block) {
-	if len(newBlocks) > len(MasterBlockchain) {
-		MasterBlockchain = newBlocks
+func (n *Node) ReplaceChain(newBlocks []*Block) {
+	if len(newBlocks) > len(n.chain) {
+		n.chain = newBlocks
 	}
 }
 

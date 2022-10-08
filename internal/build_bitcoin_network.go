@@ -23,6 +23,8 @@ func (s *Simulator) BuildBitcoinNetwork() {
 		panic("no route to host")
 	}))
 
+	broadcast := node.NewBroadcastNode()
+
 	var allServers []*bitcoin.Node
 	for _, serverCfg := range s.cfg.ServersCfg.Servers {
 		server := bitcoin.NewNodeWithDetails(serverCfg.Name,
@@ -68,6 +70,10 @@ func (s *Simulator) BuildBitcoinNetwork() {
 		channelNodeIn := node.NewChannelNode(inChannelOpt...)
 
 		restrictNodeIn := node.NewRestrictNode(node.WithBPSLimit(1024*1024, 4*1024*1024))
+
+		// broadcast -> restrict
+		s.Builder.Chain().NodeWithName("broadcast", broadcast).
+			NodeWithName(genRestrictInName(server.ID()), restrictNodeIn)
 
 		// router -> restrict -> channel -> server
 		s.Builder.Chain().NodeWithName("router", router).

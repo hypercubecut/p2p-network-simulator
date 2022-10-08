@@ -38,7 +38,7 @@ func TestSimulator_TestNodesDiscovery(t *testing.T) {
 	triggerP3PeerDiscovery :=
 		triggerP3.Send(bitcoin.NewPacket(msgtype.PeerDiscoveryMessageType, nil, nil, nil), now)
 
-	simulator.Run([]base.Event{triggerP1PeerDiscovery, triggerP2PeerDiscovery, triggerP3PeerDiscovery})
+	simulator.Run([]base.Event{triggerP1PeerDiscovery, triggerP2PeerDiscovery, triggerP3PeerDiscovery}, "peer discovery")
 	simulator.Network.Wait()
 
 	p1 := simulator.Nodes["p1"].(*bitcoin.Node)

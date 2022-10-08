@@ -1,8 +1,12 @@
 package bitcoin
 
 import (
+	"fmt"
 	"p2psimulator/internal/bitcoin/servicecode"
 	"sync"
+	"time"
+
+	"github.com/bytedance/ns-x/v2/base"
 
 	"github.com/bytedance/ns-x/v2/node"
 	"go.uber.org/zap"
@@ -110,4 +114,13 @@ func (n *Node) AddNewPeers(peers ...string) {
 			n.availablePeers[p] = true
 		}
 	}
+}
+
+// broadcast packet to all servers in the network
+func (n *Node) broadcast(packet *Packet, nodes map[string]base.Node, delay time.Duration) []base.Event {
+	broadcast := nodes["broadcast"].(*node.BroadcastNode)
+
+	fmt.Println("23edx132", broadcast)
+
+	return broadcast.Transfer(packet, time.Now().Add(delay))
 }

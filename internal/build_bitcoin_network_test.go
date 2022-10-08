@@ -30,7 +30,7 @@ func TestSimulator_BuildSimpleBitcoinNetWork(t *testing.T) {
 	triggerP1 := simulator.Nodes["trigger-p1"].(*node.EndpointNode)
 
 	healthCheckEvent := triggerP1.Send(bitcoin.NewPacket(msgtype.StartMessageType, peersToP1, nil, nil), now)
-	simulator.Run([]base.Event{healthCheckEvent})
+	simulator.Run([]base.Event{healthCheckEvent}, "healthcheck")
 	defer simulator.Network.Wait()
 }
 

@@ -7,6 +7,8 @@ import (
 	"p2psimulator/internal/bitcoin/servicecode"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/bytedance/ns-x/v2/base"
 )
 
@@ -158,6 +160,14 @@ func (n *Node) getBlockDataRespHandler(packet *Packet) []base.Event {
 	switch concrete := packet.Payload.(type) {
 	case *GetBlockDataResp:
 		blk := concrete.Block
+
+		valid := IsBlockValid(blk, n.chain[len(n.chain)-1])
+		if !valid {
+			n.logger.Debug("block is invalid", zap.String("node", n.name))
+
+			return nil
+		}
+
 		n.chain = append(n.chain, blk)
 
 		if n.inventory > n.chain[len(n.chain)-1].Index {
