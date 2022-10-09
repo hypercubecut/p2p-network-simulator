@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	cfg := internal.GenerateConfig(1000, 200, 10, 0)
+	cfg := internal.GenerateConfig(1000, 200, 10, 1)
 
 	simulator, err := internal.NewSimulator(cfg)
 	if err != nil {
@@ -41,19 +41,20 @@ func main() {
 	simulator.Run(events, "peer discovery")
 	simulator.Wait()
 
-	//events = []base.Event{}
-	//
-	//for _, peer := range cfg.ServersCfg.AllNewNodes {
-	//	i := rand.Intn(10)
-	//
-	//	triggerPeer := simulator.Nodes["trigger-"+peer].(*node.EndpointNode)
-	//	mineNewBlockEvent := triggerPeer.Send(bitcoin.NewPacket(msgtype.MineNewBlockReq,
-	//		&bitcoin.WriteBlockRequest{BPM: i * 13}, nil, nil), time.Now().
-	//		Add(time.Second*time.Duration(i*5)))
-	//
-	//	events = append(events, mineNewBlockEvent)
-	//}
-	//
-	//simulator.Run(events, "new block mining")
-	//simulator.Wait()
+	triggerMiner := simulator.Nodes["trigger-m1"].(*node.EndpointNode)
+
+	events = []base.Event{}
+	i := 1
+	for i < 21 {
+		mineNewBlock := triggerMiner.Send(bitcoin.NewPacket(msgtype.MineNewBlockReq,
+			&bitcoin.WriteBlockRequest{BPM: 120}, nil, nil),
+			time.Now().Add(time.Minute*time.Duration(i*5)))
+
+		events = append(events, mineNewBlock)
+
+		i++
+	}
+
+	simulator.Run(events, "new block mining")
+	simulator.Wait()
 }
