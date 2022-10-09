@@ -14,7 +14,10 @@ const (
 	MineNewBlockReq  MessageType = "mine_block_req"
 	MineNewBlockResp MessageType = "mine_block_resp"
 
-	InventoryMessage MessageType = "inventory"
+	InventoryMessage           MessageType = "inventory"
+	GetNewBlockMessageType     MessageType = "get_new_block_data"
+	GetNewBlockRespMessageType MessageType = "get_new_block_resp_data"
+	NewBlockAckMessageType     MessageType = "new_block_ack"
 
 	PeerDiscoveryMessageType MessageType = "peer_discovery"
 	QueryMessageType         MessageType = "query"

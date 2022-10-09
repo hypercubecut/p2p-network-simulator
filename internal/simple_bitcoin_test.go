@@ -3,7 +3,6 @@ package internal
 import (
 	"p2psimulator/internal/bitcoin"
 	"p2psimulator/internal/bitcoin/msgtype"
-	"p2psimulator/internal/config"
 	"testing"
 	"time"
 
@@ -13,9 +12,7 @@ import (
 )
 
 func TestSimulator_TestBlocksFirst(t *testing.T) {
-	cfg, err := config.NewConfigFromString(twoBitcoinNodesTestConfig)
-
-	buildInitialMasterChain(cfg.BitcoinCfg.MasterChainLen)
+	cfg := GenerateConfig(1000, 1, 1, 1)
 
 	simulator, err := NewSimulator(cfg)
 	assert.NoError(t, err)
@@ -36,19 +33,22 @@ func TestSimulator_TestBlocksFirst(t *testing.T) {
 	//fmt.Println("p1's inventory is", p1.GetInventory())
 	//spew.Dump(p1.GetChain())
 
-	p2 := simulator.Nodes["p2"].(*bitcoin.Node)
+	p2 := simulator.Nodes["f1"].(*bitcoin.Node)
 	//fmt.Println("p2's inventory is", p2.GetInventory())
 	//spew.Dump(p2.GetChain())
 
 	assert.Equal(t, p2.GetInventory(), p1.GetInventory())
 
+	triggerP3 := simulator.Nodes["trigger-m1"].(*node.EndpointNode)
+
 	var events []base.Event
 	i := 1
 	for i < 21 {
-		p1MineNewBlock := triggerP1.Send(bitcoin.NewPacket(msgtype.MineNewBlockReq,
-			&bitcoin.WriteBlockRequest{BPM: 120}, nil, nil), now.Add(time.Second*time.Duration(i*5)))
+		p3MineNewBlock := triggerP3.Send(bitcoin.NewPacket(msgtype.MineNewBlockReq,
+			&bitcoin.WriteBlockRequest{BPM: 120}, nil, nil),
+			now.Add(time.Second*time.Duration(i*5)))
 
-		events = append(events, p1MineNewBlock)
+		events = append(events, p3MineNewBlock)
 
 		i++
 	}
@@ -61,35 +61,3 @@ func TestSimulator_TestBlocksFirst(t *testing.T) {
 	assert.Equal(t, 1020, len(p1.GetChain()))
 	assert.Equal(t, 1020, len(p2.GetChain()))
 }
-
-const twoBitcoinNodesTestConfig = `
-{
-  "simulator": {
-    "enable_debug_log": false,
-    "life_time_in_min": 2
-  },
-  "servers": {
-    "servers_details": [
-      {
-        "name": "p1",
-		"seeds": ["p2"],
-        "output_delay_in_ms": 1000,
-        "output_loss_rate": 0,
-        "input_delay_in_ms": 1000,
-        "input_loss_rate": 0
-      },
-      {
-        "name": "p2",
-		"service_code": 1,
-        "output_delay_in_ms": 200,
-        "output_loss_rate": 0,
-        "input_delay_in_ms": 200,
-        "input_loss_rate": 0
-      }
-    ]
-  },
-  "bitcoin": {
-	"master_chain_len": 1000
-  }
-}
-`

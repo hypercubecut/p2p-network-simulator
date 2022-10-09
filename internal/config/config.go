@@ -3,11 +3,11 @@ package config
 type Config struct {
 	loader *Loader
 
-	SimulatorCfg *simulatorConfig
-	ServersCfg   *serversConfig
+	SimulatorCfg *SimulatorConfig
+	ServersCfg   *ServersConfig
 
 	// bitcoin related config
-	BitcoinCfg *bitcoinConfig
+	BitcoinCfg *BitcoinConfig
 }
 
 func NewConfigFromJson(file string) (*Config, error) {
@@ -44,7 +44,7 @@ func (c *Config) loadConfig() {
 	err := c.loader.GetJSON("simulator", &c.SimulatorCfg)
 	if err != nil {
 		// setup default value
-		c.SimulatorCfg = &simulatorConfig{
+		c.SimulatorCfg = &SimulatorConfig{
 			EnableDebugLog: false,
 			LifeTimeInMin:  10,
 		}

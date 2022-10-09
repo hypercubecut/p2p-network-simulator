@@ -37,7 +37,7 @@ func (n *Node) Handler(nodes map[string]base.Node, logger *zap.Logger) func(pack
 			return n.handleMineNewBlock(message, nodes)
 
 		case msgtype.InventoryMessage:
-			return n.handleInventoryMessage(message)
+			return n.handleInventoryMessage(message, nodes)
 
 		case msgtype.MineNewBlockResp:
 			return nil
@@ -87,6 +87,15 @@ func (n *Node) Handler(nodes map[string]base.Node, logger *zap.Logger) func(pack
 
 		case msgtype.GetBlockDataRespMessageType:
 			return n.getBlockDataRespHandler(message)
+
+		case msgtype.GetNewBlockMessageType:
+			return n.getNewBlockDataHandler(message)
+
+		case msgtype.GetNewBlockRespMessageType:
+			return n.getNewBlockDataRespHandler(message)
+
+		case msgtype.NewBlockAckMessageType:
+			return n.handleNewBlockAckMessage(message)
 
 		default:
 			return nil

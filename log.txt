@@ -1,0 +1,11 @@
+{"level":"info","ts":1665315239.8748531,"msg":"p8 becomes a full node now"}
+{"level":"info","ts":1665315239.8752918,"msg":"p10 becomes a full node now"}
+{"level":"info","ts":1665315239.8754141,"msg":"p1 becomes a full node now"}
+{"level":"info","ts":1665315239.8754401,"msg":"p5 becomes a full node now"}
+{"level":"info","ts":1665315239.89049,"msg":"p7 becomes a full node now"}
+{"level":"info","ts":1665315239.905472,"msg":"p9 becomes a full node now"}
+{"level":"info","ts":1665315239.919492,"msg":"p2 becomes a full node now"}
+{"level":"info","ts":1665315239.93406,"msg":"p3 becomes a full node now"}
+{"level":"info","ts":1665315239.950773,"msg":"p6 becomes a full node now"}
+{"level":"info","ts":1665315239.965882,"msg":"p4 becomes a full node now"}
+{"level":"info","ts":1665315239.966068,"msg":"finished run events peer discovery","timeCost":"9.011s"}

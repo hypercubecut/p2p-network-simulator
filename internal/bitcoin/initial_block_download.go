@@ -25,7 +25,7 @@ func (n *Node) initialBlockDownloadWithBlocksFirst(nodes map[string]base.Node) [
 			return nil
 		}
 
-		if pn.GetServiceCode() == servicecode.NODE_NETWORK {
+		if pn.GetServiceCode() == servicecode.FullNode {
 			pickedNode = pn
 			break
 		}
@@ -46,6 +46,8 @@ func (n *Node) initialBlockDownloadWithBlocksFirst(nodes map[string]base.Node) [
 		Source:      n,
 		Destination: pickedNode,
 	}, time.Now())
+
+	n.logger.Debug(fmt.Sprintf("%s pick node %s for IBD", n.name, pickedNode.name))
 
 	return base.Aggregate(event)
 }
@@ -128,6 +130,8 @@ func (n *Node) getData(packet *Packet) []base.Event {
 			Destination: packet.Source,
 		}, time.Now())
 
+		n.logger.Debug(fmt.Sprintf("%s send get block data msg to %s", n.name, packet.Source.name))
+
 		return base.Aggregate(event)
 	}
 
@@ -148,6 +152,8 @@ func (n *Node) getBlockDataHandler(packet *Packet) []base.Event {
 			Source:      n,
 			Destination: packet.Source,
 		}, time.Now())
+
+		n.logger.Debug(fmt.Sprintf("%s send block data to %s", n.name, packet.Source.name))
 
 		return base.Aggregate(event)
 
@@ -179,6 +185,11 @@ func (n *Node) getBlockDataRespHandler(packet *Packet) []base.Event {
 			}, time.Now())
 
 			return base.Aggregate(event)
+		}
+
+		if n.serviceCode != servicecode.FullNode {
+			n.serviceCode = servicecode.FullNode
+			n.logger.Info(fmt.Sprintf("%s becomes a full node now", n.name))
 		}
 
 		return nil

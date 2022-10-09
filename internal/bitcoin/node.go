@@ -33,12 +33,16 @@ type Node struct {
 	// local chain
 	chain []*Block
 
+	state string
+
+	newMinedBlock *Block
+
 	logger *zap.Logger
 	wg     sync.WaitGroup
 	lc     sync.Mutex
 }
 
-func NewClientNode(name string, seeds []string, logger *zap.Logger) *Node {
+func NewNode(name string, seeds []string, logger *zap.Logger) *Node {
 	return &Node{
 		EndpointNode:   node.NewEndpointNode(),
 		name:           name,
@@ -53,26 +57,28 @@ func NewClientNode(name string, seeds []string, logger *zap.Logger) *Node {
 }
 
 func NewNodeWithDetails(name string, serviceCode int,
-	seeds []string, logger *zap.Logger) *Node {
-
+	peers []string, logger *zap.Logger) *Node {
 	switch serviceCode {
-	case servicecode.NODE_NETWORK:
-		return NewFullNode(name, logger)
+	case servicecode.FullNode:
+		return NewFullNode(name, logger, peers)
 
 	case servicecode.Unnamed:
-		return NewClientNode(name, seeds, logger)
+		return NewNode(name, peers, logger)
+
+	case servicecode.MinerNode:
+		return NewMinerNode(name, logger, peers)
 
 	default:
-		return NewClientNode(name, seeds, logger)
+		return NewNode(name, peers, logger)
 	}
 }
 
-func NewFullNode(name string, logger *zap.Logger) *Node {
-	return &Node{
+func NewFullNode(name string, logger *zap.Logger, peers []string) *Node {
+	n := &Node{
 		EndpointNode:   node.NewEndpointNode(),
 		name:           name,
 		logger:         logger,
-		serviceCode:    servicecode.NODE_NETWORK,
+		serviceCode:    servicecode.FullNode,
 		version:        defaultVersion,
 		inventory:      MasterBlockchain[len(MasterBlockchain)-1].Index,
 		chain:          MasterBlockchain,
@@ -80,6 +86,28 @@ func NewFullNode(name string, logger *zap.Logger) *Node {
 		wg:             sync.WaitGroup{},
 		lc:             sync.Mutex{},
 	}
+
+	n.AddNewPeers(peers...)
+
+	return n
+}
+
+func NewMinerNode(name string, logger *zap.Logger, peers []string) *Node {
+	n := &Node{
+		EndpointNode:   node.NewEndpointNode(),
+		name:           name,
+		logger:         logger,
+		serviceCode:    servicecode.MinerNode,
+		version:        defaultVersion,
+		inventory:      MasterBlockchain[len(MasterBlockchain)-1].Index,
+		availablePeers: make(map[string]bool),
+		wg:             sync.WaitGroup{},
+		lc:             sync.Mutex{},
+	}
+
+	n.AddNewPeers(peers...)
+
+	return n
 }
 
 func (n *Node) ID() string {

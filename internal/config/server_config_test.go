@@ -32,7 +32,7 @@ func TestServerDetailsConfig_UnmarshalJSON(t *testing.T) {
     ]
 }`)
 
-	cfg := &serversConfig{}
+	cfg := &ServersConfig{}
 
 	err := json.Unmarshal(testJson, cfg)
 	assert.NoError(t, err)
@@ -41,5 +41,5 @@ func TestServerDetailsConfig_UnmarshalJSON(t *testing.T) {
 	assert.Equal(t, 200, int(cfg.Servers[2].InputDelayInMs))
 
 	assert.Equal(t, "p3", cfg.Servers[2].Name)
-	assert.Equal(t, servicecode.NODE_NETWORK, int(cfg.Servers[2].ServiceCode))
+	assert.Equal(t, servicecode.FullNode, int(cfg.Servers[2].ServiceCode))
 }

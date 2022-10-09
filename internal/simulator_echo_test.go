@@ -34,9 +34,9 @@ func Test_PingPongTest(t *testing.T) {
 		NodeWithName("restrict 2", node.NewRestrictNode(node.WithPPSLimit(10, 50))).
 		NodeWithName("channel 2", node.NewChannelNode(node.WithDelay(math.NewFixedDelay(200*time.Millisecond)))).
 		Chain().
-		NodeWithName("peer-1", bitcoin.NewClientNode("192.168.0.1", []string{}, simulator.Logger)).
+		NodeWithName("peer-1", bitcoin.NewNode("192.168.0.1", []string{}, simulator.Logger)).
 		Group("restrict 1", "channel 1").
-		NodeWithName("peer-2", bitcoin.NewClientNode("192.168.0.2", []string{}, simulator.Logger)).
+		NodeWithName("peer-2", bitcoin.NewNode("192.168.0.2", []string{}, simulator.Logger)).
 		Chain().
 		NodeOfName("peer-2").
 		Group("restrict 2", "channel 2").

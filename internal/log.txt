@@ -1,2 +1,21 @@
-{"level":"info","ts":1665220892.6596742,"msg":"finished run events p1 peer discovery","timeCost":"1.21s"}
-{"level":"info","ts":1665220892.6646872,"msg":"finished run events new block mining","timeCost":"1m38.792s"}
+{"level":"info","ts":1665315216.3201332,"msg":"p18 becomes a full node now"}
+{"level":"info","ts":1665315217.74429,"msg":"p3 becomes a full node now"}
+{"level":"info","ts":1665315220.391285,"msg":"p8 becomes a full node now"}
+{"level":"info","ts":1665315220.406549,"msg":"p1 becomes a full node now"}
+{"level":"info","ts":1665315220.428788,"msg":"p5 becomes a full node now"}
+{"level":"info","ts":1665315220.483409,"msg":"p10 becomes a full node now"}
+{"level":"info","ts":1665315220.4949791,"msg":"p17 becomes a full node now"}
+{"level":"info","ts":1665315220.584919,"msg":"p12 becomes a full node now"}
+{"level":"info","ts":1665315220.634948,"msg":"p16 becomes a full node now"}
+{"level":"info","ts":1665315220.645637,"msg":"p13 becomes a full node now"}
+{"level":"info","ts":1665315220.743037,"msg":"p7 becomes a full node now"}
+{"level":"info","ts":1665315220.955539,"msg":"p11 becomes a full node now"}
+{"level":"info","ts":1665315221.0942779,"msg":"p9 becomes a full node now"}
+{"level":"info","ts":1665315221.2787468,"msg":"p20 becomes a full node now"}
+{"level":"info","ts":1665315221.64945,"msg":"p2 becomes a full node now"}
+{"level":"info","ts":1665315221.661925,"msg":"p19 becomes a full node now"}
+{"level":"info","ts":1665315222.116739,"msg":"p6 becomes a full node now"}
+{"level":"info","ts":1665315222.199007,"msg":"p15 becomes a full node now"}
+{"level":"info","ts":1665315222.4314911,"msg":"p4 becomes a full node now"}
+{"level":"info","ts":1665315222.4318888,"msg":"p14 becomes a full node now"}
+{"level":"info","ts":1665315222.4320772,"msg":"finished run events peer discovery","timeCost":"14.242s"}

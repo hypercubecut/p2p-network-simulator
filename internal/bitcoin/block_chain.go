@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
@@ -12,6 +13,7 @@ import (
 var (
 	GenesisBlock     = &Block{0, time.Now().String(), 0, "", "", ""}
 	MasterBlockchain = []*Block{GenesisBlock}
+	mclock           sync.RWMutex
 )
 
 type Block struct {

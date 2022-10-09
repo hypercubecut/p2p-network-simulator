@@ -181,6 +181,12 @@ func (n *Node) getAddressesRespHandler(packet *Packet, nodes map[string]base.Nod
 		n.AddNewPeers(packet.Payload.(*GetAddressResp).MorePeers...)
 
 		// Todo: implement header first here
+		if n.state == "IBD" {
+			return nil
+		}
+
+		n.logger.Debug(fmt.Sprintf("start initial block download for node %s", n.name))
+		n.state = "IBD"
 
 		return n.initialBlockDownloadWithBlocksFirst(nodes)
 

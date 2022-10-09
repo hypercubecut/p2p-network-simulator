@@ -16,6 +16,8 @@ var (
 )
 
 func (s *Simulator) BuildBitcoinNetwork() {
+	buildInitialMasterChain(s.cfg.BitcoinCfg.MasterChainLen)
+
 	router := node.NewScatterNode(node.WithRouteSelector(func(packet base.Packet, nodes []base.Node) base.Node {
 		if p, ok := packet.(*bitcoin.Packet); ok {
 			return s.Nodes[genRestrictInName(p.Destination.ID())]
@@ -28,7 +30,7 @@ func (s *Simulator) BuildBitcoinNetwork() {
 	var allServers []*bitcoin.Node
 	for _, serverCfg := range s.cfg.ServersCfg.Servers {
 		server := bitcoin.NewNodeWithDetails(serverCfg.Name,
-			int(serverCfg.ServiceCode), serverCfg.Seeds, s.Logger)
+			int(serverCfg.ServiceCode), s.cfg.ServersCfg.AllFullNodes, s.Logger)
 
 		// add trigger node for each bitcoin node
 		s.Builder.Chain().
@@ -49,7 +51,9 @@ func (s *Simulator) BuildBitcoinNetwork() {
 		// RestrictNode simulate a node with limited ability
 		// Once packets through a RestrictNode reaches the limit(in bps or pps), the later packets will be put in a queue
 		// Once the queue overflow, later packets will be discarded
-		restrictNodeOut := node.NewRestrictNode(node.WithBPSLimit(1024*1024, 4*1024*1024))
+		restrictNodeOut := node.NewRestrictNode(
+			node.WithBPSLimit(float64(serverCfg.OutputBPS), serverCfg.QueueLimit*serverCfg.OutputBPS),
+			node.WithPPSLimit(float64(serverCfg.OutputPPS), serverCfg.QueueLimit*serverCfg.OutputPPS))
 
 		// output flow chain
 		// server -> channel -> restrict -> router
@@ -69,7 +73,9 @@ func (s *Simulator) BuildBitcoinNetwork() {
 		}
 		channelNodeIn := node.NewChannelNode(inChannelOpt...)
 
-		restrictNodeIn := node.NewRestrictNode(node.WithBPSLimit(1024*1024, 4*1024*1024))
+		restrictNodeIn := node.NewRestrictNode(
+			node.WithBPSLimit(float64(serverCfg.InputBPS), serverCfg.QueueLimit*serverCfg.InputBPS),
+			node.WithPPSLimit(float64(serverCfg.InputPPS), serverCfg.QueueLimit*serverCfg.InputPPS))
 
 		// broadcast -> restrict
 		s.Builder.Chain().NodeWithName("broadcast", broadcast).
@@ -84,7 +90,7 @@ func (s *Simulator) BuildBitcoinNetwork() {
 		allServers = append(allServers, server)
 	}
 
-	network, nodes := s.Builder.Summary().Build()
+	network, nodes := s.Builder.Build()
 
 	for _, server := range allServers {
 		server.Receive(server.Handler(nodes, s.Logger))

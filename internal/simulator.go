@@ -64,7 +64,9 @@ func NewSimulator(cfg *config.Config) (*Simulator, error) {
 
 func (s *Simulator) Run(events []base.Event, note string) {
 	s.Clock = tick.NewStepClock(s.SimulatorTime, time.Millisecond)
-	s.Network.Run(events, s.Clock, s.LifeTime)
+	s.Network.Run(events, s.Clock, s.LifeTime,
+		nsx.WithMaxBuckets(200000000000000),
+		nsx.WithBucketSize(time.Hour*200))
 	s.note = note
 }
 

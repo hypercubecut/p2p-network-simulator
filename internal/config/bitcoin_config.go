@@ -1,5 +1,5 @@
 package config
 
-type bitcoinConfig struct {
+type BitcoinConfig struct {
 	MasterChainLen int `json:"master_chain_len"`
 }
