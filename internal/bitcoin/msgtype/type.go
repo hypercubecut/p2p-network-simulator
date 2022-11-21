@@ -15,6 +15,7 @@ const (
 	MineNewBlockResp MessageType = "mine_block_resp"
 
 	InventoryMessage           MessageType = "inventory"
+	InvalidInventoryMessage    MessageType = "invalid_inv"
 	GetNewBlockMessageType     MessageType = "get_new_block_data"
 	GetNewBlockRespMessageType MessageType = "get_new_block_resp_data"
 	NewBlockAckMessageType     MessageType = "new_block_ack"
@@ -39,4 +40,6 @@ const (
 	GetBlockDataRespMessageType MessageType = "get_block_data_resp"
 
 	ErrMessageType MessageType = "error"
+
+	P2PWithBroadcastMessageType MessageType = "p2p_broadcast"
 )

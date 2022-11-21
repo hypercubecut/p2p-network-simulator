@@ -54,8 +54,8 @@ func Test_BasicSanityTest(t *testing.T) {
 	routeTable[server2] = route2
 	ipTable["192.168.0.1"] = server1
 	ipTable["192.168.0.2"] = server2
-	server1.Receive(server1.Handler(nodes, simulator.Logger)) // server 1 should receive after 1-second send delay + 200 milliseconds channel delay
-	server2.Receive(server2.Handler(nodes, simulator.Logger)) // server 2 should receive after 2-second send delay + 200 milliseconds channel delay
+	server1.Receive(server1.Handler(nodes, now, simulator.Logger)) // server 1 should receive after 1-second send delay + 200 milliseconds channel delay
+	server2.Receive(server2.Handler(nodes, now, simulator.Logger)) // server 2 should receive after 2-second send delay + 200 milliseconds channel delay
 	sender := createSender(client, ipTable)
 	events := make([]base.Event, 0)
 	events = append(events, sender(&bitcoin.Packet{}, "192.168.0.1", now.Add(time.Second*1))) // send to server1 after 1 second

@@ -49,9 +49,9 @@ func Test_PingPongTest(t *testing.T) {
 	endpoint1 := nodes["peer-1"].(*bitcoin.Node)
 	endpoint2 := nodes["peer-2"].(*bitcoin.Node)
 
-	endpoint1.Receive(endpoint1.Handler(nodes, simulator.Logger))
+	endpoint1.Receive(endpoint1.Handler(nodes, now, simulator.Logger))
 
-	endpoint2.Receive(endpoint2.Handler(nodes, simulator.Logger))
+	endpoint2.Receive(endpoint2.Handler(nodes, now, simulator.Logger))
 
 	seedsToPeer1 := &bitcoin.Peers{
 		Peers: []string{"peer-2"},

@@ -22,6 +22,7 @@ type Node struct {
 
 	// unique name in network
 	name string
+	id   int64
 
 	serviceCode    int64
 	version        int32
@@ -40,6 +41,10 @@ type Node struct {
 	logger *zap.Logger
 	wg     sync.WaitGroup
 	lc     sync.Mutex
+
+	missingBlock []int
+
+	cache map[string]struct{}
 }
 
 func NewNode(name string, seeds []string, logger *zap.Logger) *Node {
@@ -74,6 +79,9 @@ func NewNodeWithDetails(name string, serviceCode int,
 }
 
 func NewFullNode(name string, logger *zap.Logger, peers []string) *Node {
+	cpy := make([]*Block, len(MasterBlockchain))
+	copy(cpy, MasterBlockchain)
+
 	n := &Node{
 		EndpointNode:   node.NewEndpointNode(),
 		name:           name,
@@ -81,10 +89,11 @@ func NewFullNode(name string, logger *zap.Logger, peers []string) *Node {
 		serviceCode:    servicecode.FullNode,
 		version:        defaultVersion,
 		inventory:      MasterBlockchain[len(MasterBlockchain)-1].Index,
-		chain:          MasterBlockchain,
+		chain:          cpy,
 		availablePeers: make(map[string]bool),
 		wg:             sync.WaitGroup{},
 		lc:             sync.Mutex{},
+		cache:          make(map[string]struct{}),
 	}
 
 	n.AddNewPeers(peers...)

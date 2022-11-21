@@ -16,7 +16,7 @@ const (
 	maxInventoryLen = 500
 )
 
-func (n *Node) initialBlockDownloadWithBlocksFirst(nodes map[string]base.Node) []base.Event {
+func (n *Node) initialBlockDownloadWithBlocksFirst(nodes map[string]base.Node, now time.Time) []base.Event {
 	// pick one full node
 	var pickedNode *Node
 	for peer, _ := range n.availablePeers {
@@ -45,14 +45,14 @@ func (n *Node) initialBlockDownloadWithBlocksFirst(nodes map[string]base.Node) [
 		},
 		Source:      n,
 		Destination: pickedNode,
-	}, time.Now())
+	}, now)
 
 	n.logger.Debug(fmt.Sprintf("%s pick node %s for IBD", n.name, pickedNode.name))
 
 	return base.Aggregate(event)
 }
 
-func (n *Node) getBlocksHandler(packet *Packet) []base.Event {
+func (n *Node) getBlocksHandler(packet *Packet, now time.Time) []base.Event {
 	switch concrete := packet.Payload.(type) {
 	case *GetBlocksReq:
 		clientLastBlockIdx := concrete.BlockIndex
@@ -75,7 +75,7 @@ func (n *Node) getBlocksHandler(packet *Packet) []base.Event {
 			},
 			Source:      n,
 			Destination: packet.Source,
-		}, time.Now())
+		}, now)
 
 		return base.Aggregate(event)
 
@@ -84,7 +84,7 @@ func (n *Node) getBlocksHandler(packet *Packet) []base.Event {
 	}
 }
 
-func (n *Node) getBlocksRespHandler(packet *Packet) []base.Event {
+func (n *Node) getBlocksRespHandler(packet *Packet, now time.Time) []base.Event {
 	switch concrete := packet.Payload.(type) {
 	case *GetBlocksResp:
 		inv := concrete.Inventory
@@ -103,14 +103,14 @@ func (n *Node) getBlocksRespHandler(packet *Packet) []base.Event {
 				},
 				Source:      n,
 				Destination: packet.Source,
-			}, time.Now())
+			}, now)
 
 			return base.Aggregate(event)
 		}
 
 		n.inventory = inv
 
-		return n.getData(packet)
+		return n.getData(packet, now)
 
 	case *Error:
 		return nil
@@ -120,7 +120,7 @@ func (n *Node) getBlocksRespHandler(packet *Packet) []base.Event {
 	}
 }
 
-func (n *Node) getData(packet *Packet) []base.Event {
+func (n *Node) getData(packet *Packet, now time.Time) []base.Event {
 	// get missing blocks' data
 	if n.inventory > n.chain[len(n.chain)-1].Index {
 		event := n.Send(&Packet{
@@ -128,7 +128,7 @@ func (n *Node) getData(packet *Packet) []base.Event {
 			Payload:     &GetBlockDataReq{n.chain[len(n.chain)-1].Index + 1},
 			Source:      n,
 			Destination: packet.Source,
-		}, time.Now())
+		}, now)
 
 		n.logger.Debug(fmt.Sprintf("%s send get block data msg to %s", n.name, packet.Source.name))
 
@@ -138,7 +138,7 @@ func (n *Node) getData(packet *Packet) []base.Event {
 	return nil
 }
 
-func (n *Node) getBlockDataHandler(packet *Packet) []base.Event {
+func (n *Node) getBlockDataHandler(packet *Packet, now time.Time) []base.Event {
 	switch concrete := packet.Payload.(type) {
 	case *GetBlockDataReq:
 		if concrete.Index > len(n.chain) || n.chain[concrete.Index] == nil {
@@ -151,7 +151,8 @@ func (n *Node) getBlockDataHandler(packet *Packet) []base.Event {
 			Payload:     &GetBlockDataResp{n.chain[concrete.Index]},
 			Source:      n,
 			Destination: packet.Source,
-		}, time.Now())
+			SizeInBytes: blockSize,
+		}, now)
 
 		n.logger.Debug(fmt.Sprintf("%s send block data to %s", n.name, packet.Source.name))
 
@@ -162,7 +163,7 @@ func (n *Node) getBlockDataHandler(packet *Packet) []base.Event {
 	}
 }
 
-func (n *Node) getBlockDataRespHandler(packet *Packet) []base.Event {
+func (n *Node) getBlockDataRespHandler(packet *Packet, now time.Time) []base.Event {
 	switch concrete := packet.Payload.(type) {
 	case *GetBlockDataResp:
 		blk := concrete.Block
@@ -182,7 +183,7 @@ func (n *Node) getBlockDataRespHandler(packet *Packet) []base.Event {
 				Payload:     &GetBlockDataReq{n.chain[len(n.chain)-1].Index + 1},
 				Source:      n,
 				Destination: packet.Source,
-			}, time.Now())
+			}, now)
 
 			return base.Aggregate(event)
 		}

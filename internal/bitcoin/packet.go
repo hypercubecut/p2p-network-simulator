@@ -14,9 +14,15 @@ type Packet struct {
 	Payload     interface{}
 	Source      *Node
 	Destination *Node
+
+	SizeInBytes int
 }
 
 func (m *Packet) Size() int {
+	if m.SizeInBytes != 0 {
+		return m.SizeInBytes
+	}
+
 	i := uint64(unsafe.Sizeof(m))
 
 	return int(i)

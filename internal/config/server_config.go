@@ -6,10 +6,10 @@ import (
 )
 
 type ServersConfig struct {
-	Servers        []ServerDetailsConfig `json:"servers_details"`
-	AllFullNodes   []string              `json:"all_full_nodes"`
-	AllNewNodes    []string              `json:"all_new_nodes"`
-	AllMinersNodes []string              `json:"all_miners_nodes"`
+	Servers        []*ServerDetailsConfig `json:"servers_details"`
+	AllFullNodes   []string               `json:"all_full_nodes"`
+	AllNewNodes    []string               `json:"all_new_nodes"`
+	AllMinersNodes []string               `json:"all_miners_nodes"`
 }
 
 type ServerDetailsConfig struct {
@@ -19,6 +19,8 @@ type ServerDetailsConfig struct {
 
 	// for client bitcoin node only
 	Seeds []string `json:"seeds"`
+
+	Peers []string `json:"peers"`
 
 	// output flow configs
 	OutputDelayInMs int64   `json:"output_delay_in_ms"`

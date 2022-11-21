@@ -74,6 +74,8 @@ func GenerateBlockWithContent(oldBlock *Block, BPM int, content string) (*Block,
 }
 
 func IsBlockValid(newBlock, oldBlock *Block) bool {
+	//time.Sleep(time.Second)
+
 	if oldBlock.Index+1 != newBlock.Index {
 		return false
 	}

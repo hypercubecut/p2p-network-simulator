@@ -15,7 +15,7 @@ import (
 )
 
 func TestSimulator_Scale(t *testing.T) {
-	cfg := GenerateConfig(100, 2000, 20, 0)
+	cfg := GenerateConfig(100, 2000, 20, 0, 10, 1)
 
 	sim, err := NewSimulator(cfg)
 	assert.NoError(t, err)
@@ -43,4 +43,8 @@ func TestSimulator_Scale(t *testing.T) {
 		n := sim.Nodes[peer].(*bitcoin.Node)
 		assert.Equal(t, 100, len(n.GetChain()), fmt.Sprintf("node %s", peer))
 	}
+}
+
+func TestGenerateConfig(t *testing.T) {
+	fmt.Println(getNSeparatedPeers(10, 100, 1, 100))
 }

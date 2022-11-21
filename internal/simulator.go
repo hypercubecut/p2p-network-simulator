@@ -70,7 +70,7 @@ func (s *Simulator) Run(events []base.Event, note string) {
 	s.note = note
 }
 
-func (s *Simulator) Wait() {
+func (s *Simulator) Wait() time.Duration {
 	s.Network.Wait()
 
 	clockTime := s.Clock()
@@ -80,6 +80,8 @@ func (s *Simulator) Wait() {
 	s.Logger.Info(fmt.Sprintf("finished run events %s", s.note), zap.String("timeCost", diff.String()))
 
 	s.SimulatorTime = clockTime
+
+	return diff
 }
 
 func (s *Simulator) GetSimulatorTime() time.Time {

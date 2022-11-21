@@ -12,7 +12,7 @@ import (
 )
 
 func TestSimulator_TestBlocksFirst(t *testing.T) {
-	cfg := GenerateConfig(1000, 1, 1, 1)
+	cfg := GenerateConfig(1000, 10, 2, 1, 10, 1)
 
 	simulator, err := NewSimulator(cfg)
 	assert.NoError(t, err)

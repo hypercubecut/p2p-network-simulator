@@ -55,3 +55,8 @@ type GetBlockDataResp struct {
 type InventoryMessage struct {
 	Inventory int
 }
+
+type P2PMessage struct {
+	MsgID string
+	Dest  string
+}
