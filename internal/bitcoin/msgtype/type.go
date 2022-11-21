@@ -12,6 +12,7 @@ const (
 	GetBlockChainResp MessageType = "get_block_chain_resp"
 
 	MineNewBlockReq  MessageType = "mine_block_req"
+	MineSameBlockReq MessageType = "mine_same_block_req"
 	MineNewBlockResp MessageType = "mine_block_resp"
 
 	InventoryMessage           MessageType = "inventory"

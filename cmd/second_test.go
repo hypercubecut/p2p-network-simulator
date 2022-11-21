@@ -19,9 +19,9 @@ func Test_SecondMain(t *testing.T) {
 		10, 2,
 		internal.WithFullNodeBPS(int64(MBPS500)),
 		internal.WithNewNodeBPS(int64(MBPS500)),
-		internal.WithFullNodeDelay(25),
-		internal.WithNewNodeDelay(25),
-		internal.WithMinerNodeDelay(25),
+		internal.WithFullNodeDelay(100),
+		internal.WithNewNodeDelay(100),
+		internal.WithMinerNodeDelay(100),
 		internal.WithMinerNodeBPS(int64(MBPS500)))
 
 	simulator, err := internal.NewSimulator(cfg)

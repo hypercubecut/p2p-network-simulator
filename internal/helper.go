@@ -202,6 +202,39 @@ func WithMinerNodeDelay(delayInMs int64) Option {
 	}
 }
 
+func WithRandomMinerNodeDelay() Option {
+
+	return func(cfg *config.Config) {
+		rand.Seed(time.Now().UnixNano())
+		min := 0
+		max := 1000
+
+		for _, server := range cfg.ServersCfg.Servers {
+			if server.ServiceCode == servicecode.MinerNode {
+				delta := rand.Intn(max-min+1) + min
+				server.InputDelayInMs = int64(50 + delta)
+				server.OutputDelayInMs = int64(50 + delta)
+			}
+		}
+	}
+}
+
+func WithDifferentMinerNodeDelay(minerName string) Option {
+	return func(cfg *config.Config) {
+		for _, server := range cfg.ServersCfg.Servers {
+			if server.ServiceCode == servicecode.MinerNode {
+				if server.Name == minerName {
+					server.InputDelayInMs = 10
+					server.OutputDelayInMs = 10
+				} else {
+					server.InputDelayInMs = 200
+					server.OutputDelayInMs = 200
+				}
+			}
+		}
+	}
+}
+
 func WithMinerNodePPS(pps int64) Option {
 	return func(cfg *config.Config) {
 		for _, server := range cfg.ServersCfg.Servers {

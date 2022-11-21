@@ -36,6 +36,9 @@ func (n *Node) Handler(nodes map[string]base.Node, now time.Time, logger *zap.Lo
 		case msgtype.MineNewBlockReq:
 			return n.handleMineNewBlock(message, nodes, now)
 
+		case msgtype.MineSameBlockReq:
+			return n.handleMineSameBlock(message, nodes, now)
+
 		case msgtype.InventoryMessage:
 			return n.handleInventoryMessage(message, now)
 

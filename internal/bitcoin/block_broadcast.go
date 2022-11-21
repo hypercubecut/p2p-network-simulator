@@ -51,6 +51,38 @@ func (n *Node) handleMineNewBlock(request *Packet, nodes map[string]base.Node, n
 	return n.handleStandardBlockRelay(newBlock, nodes, now)
 }
 
+func (n *Node) handleMineSameBlock(request *Packet, nodes map[string]base.Node, now time.Time) []base.Event {
+	mclock.Lock()
+	defer mclock.Unlock()
+
+	if n.serviceCode != servicecode.MinerNode {
+		return nil
+	}
+
+	n.logger.Debug(fmt.Sprintf("%s start mine a new block", n.name), zap.Int("chainLen", len(n.chain)))
+
+	prevLastBlock := MasterBlockchain[len(MasterBlockchain)-1]
+
+	reqDTO, ok := request.Payload.(*WriteBlockRequest)
+	if !ok {
+		n.logger.Error("handleWriteBlock failed unmarshal payload")
+		return n.handleErrResp(msgtype.MineNewBlockResp, ErrUnknownPayload, request)
+	}
+
+	newBlock, err := GenerateBlock(prevLastBlock, reqDTO.BPM)
+	if err != nil {
+		n.logger.Error(fmt.Sprintf("%s failed to generateBlock", n.name), zap.Error(err))
+		return n.handleErrResp(msgtype.MineNewBlockResp, err, request)
+	}
+
+	//MasterBlockchain = append(MasterBlockchain, newBlock)
+
+	n.newMinedBlock = newBlock
+	//n.logger.Info(fmt.Sprintf("%s finish mine a new block", n.name), zap.Int("newBlock", newBlock.Index))
+
+	return n.handleStandardBlockRelay(newBlock, nodes, now)
+}
+
 func getIDFromName(name string) int64 {
 	idStr := strings.Split(name, "-")[1]
 	id, _ := strconv.ParseInt(idStr, 0, 64)

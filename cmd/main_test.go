@@ -19,7 +19,7 @@ var (
 
 func Test_PublishOneNewBlock(t *testing.T) {
 	cfg := internal.GenerateConfig(10, 15000, 0, 1,
-		10, 3,
+		1, 2,
 		internal.WithFullNodeBPS(int64(MBPS500)),
 		internal.WithNewNodeBPS(int64(MBPS500)),
 		internal.WithFullNodeDelay(100),
